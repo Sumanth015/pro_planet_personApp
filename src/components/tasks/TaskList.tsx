@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { CoinRedemption } from "@/components/redemption/CoinRedemption";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface Task {
   id: string;
@@ -54,6 +56,7 @@ export const TaskList = ({ onTaskComplete }: TaskListProps) => {
     category: "recycling" as Task["category"],
     impact: "",
   });
+  const { isAuthenticated, updateCoins } = useAuth();
 
   const filteredTasks = tasks.filter(
     (task) => filter === "all" || task.category === filter
@@ -64,6 +67,9 @@ export const TaskList = ({ onTaskComplete }: TaskListProps) => {
       prev.map((task) => {
         if (task.id === taskId && !task.completed) {
           setEcoCoins((c) => c + task.coins);
+          if (isAuthenticated) {
+            updateCoins(task.coins);
+          }
           onTaskComplete(task);
           toast.success(`Task completed! You earned ${task.coins} eco-coins 🌱`);
           return { ...task, completed: true };
@@ -112,6 +118,13 @@ export const TaskList = ({ onTaskComplete }: TaskListProps) => {
     toast.info("Task removed");
   };
 
+  const handleRedeem = (amount: number) => {
+    setEcoCoins((prev) => prev - amount);
+    if (isAuthenticated) {
+      updateCoins(-amount);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with coins */}
@@ -124,12 +137,15 @@ export const TaskList = ({ onTaskComplete }: TaskListProps) => {
                 Each completed task earns you eco-coins. 100 coins = ₹1 in value!
               </p>
             </div>
-            <div className="flex items-center gap-4 bg-primary-dark/50 px-6 py-3 rounded-full">
-              <Coins className="w-8 h-8 text-eco-coin" />
-              <div>
-                <p className="text-sm text-primary-foreground/80">Your Eco-Coins</p>
-                <p className="text-2xl font-bold">{ecoCoins}</p>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 bg-primary-dark/50 px-6 py-3 rounded-full">
+                <Coins className="w-8 h-8 text-eco-coin" />
+                <div>
+                  <p className="text-sm text-primary-foreground/80">Your Eco-Coins</p>
+                  <p className="text-2xl font-bold">{ecoCoins}</p>
+                </div>
               </div>
+              <CoinRedemption ecoCoins={ecoCoins} onRedeem={handleRedeem} />
             </div>
           </div>
         </CardContent>

@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Leaf, Bell, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Leaf, Bell, User, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
   notificationCount: number;
@@ -16,11 +23,19 @@ const navLinks = [
   { path: "/tasks", label: "Tasks" },
   { path: "/videos", label: "Videos" },
   { path: "/articles", label: "Articles" },
+  { path: "/contact", label: "Contact" },
 ];
 
 export const Navbar = ({ notificationCount, onNotificationClick }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-50">
@@ -67,15 +82,41 @@ export const Navbar = ({ notificationCount, onNotificationClick }: NavbarProps) 
               )}
             </Button>
 
-            {/* User */}
-            <Button
-              variant="secondary"
-              size="sm"
-              className="hidden sm:flex items-center gap-2 bg-primary-foreground text-primary hover:bg-primary-light hover:text-primary-foreground"
-            >
-              <User className="w-4 h-4" />
-              Profile
-            </Button>
+            {/* User Menu */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="hidden sm:flex items-center gap-2 bg-primary-foreground text-primary hover:bg-primary-light hover:text-primary-foreground"
+                  >
+                    <User className="w-4 h-4" />
+                    {user?.name?.split(" ")[0] || "Profile"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled className="text-muted-foreground">
+                    {user?.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="hidden sm:flex items-center gap-2 bg-primary-foreground text-primary hover:bg-primary-light hover:text-primary-foreground"
+              >
+                <LogIn className="w-4 h-4" />
+                Login
+              </Button>
+            )}
 
             {/* Mobile menu button */}
             <Button
@@ -108,6 +149,26 @@ export const Navbar = ({ notificationCount, onNotificationClick }: NavbarProps) 
                   {link.label}
                 </Link>
               ))}
+              {/* Mobile Auth Button */}
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                  className="px-4 py-3 rounded-lg text-sm font-medium text-left hover:bg-primary-dark flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" /> Logout
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-3 rounded-lg text-sm font-medium hover:bg-primary-dark flex items-center gap-2"
+                >
+                  <LogIn className="w-4 h-4" /> Login
+                </Link>
+              )}
             </div>
           </div>
         )}
