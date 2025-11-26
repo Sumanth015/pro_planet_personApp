@@ -243,20 +243,9 @@
   }
 }
 
-/* Leaflet map styles */
-.leaflet-container {
+/* Map iframe styles */
+.map-container iframe {
   @apply rounded-xl;
-  height: 100%;
-  width: 100%;
-  z-index: 1;
-}
-
-.leaflet-popup-content-wrapper {
-  @apply bg-card text-card-foreground rounded-lg shadow-lg;
-}
-
-.leaflet-popup-content {
-  @apply p-2;
 }
 
 .custom-marker {

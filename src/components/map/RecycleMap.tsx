@@ -1,34 +1,9 @@
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
-import { MapPin, Phone, Clock, Recycle, Trash2, Leaf, Search, Navigation } from "lucide-react";
+import { useState } from "react";
+import { MapPin, Phone, Clock, Recycle, Trash2, Leaf, Search, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import "leaflet/dist/leaflet.css";
-
-// Fix for default markers
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
-
-// Custom marker icons
-const createCustomIcon = (color: string) =>
-  L.divIcon({
-    className: "custom-div-icon",
-    html: `<div style="background-color: ${color}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-  });
-
-const recycleIcon = createCustomIcon("#2c7a45");
-const ewasteIcon = createCustomIcon("#3b82f6");
-const compostIcon = createCustomIcon("#84cc16");
 
 interface RecycleHub {
   id: string;
@@ -111,41 +86,10 @@ const recycleHubs: RecycleHub[] = [
   },
 ];
 
-function LocationMarker() {
-  const [position, setPosition] = useState<L.LatLng | null>(null);
-  const map = useMap();
-
-  const handleLocate = () => {
-    map.locate().on("locationfound", (e) => {
-      setPosition(e.latlng);
-      map.flyTo(e.latlng, 14);
-    });
-  };
-
-  useEffect(() => {
-    const btn = document.getElementById("locate-btn");
-    btn?.addEventListener("click", handleLocate);
-    return () => btn?.removeEventListener("click", handleLocate);
-  }, [map]);
-
-  return position ? (
-    <Marker
-      position={position}
-      icon={L.divIcon({
-        className: "custom-div-icon",
-        html: `<div style="background-color: #ef4444; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"></div>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
-      })}
-    >
-      <Popup>You are here</Popup>
-    </Marker>
-  ) : null;
-}
-
 export const RecycleMap = () => {
   const [filter, setFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedHub, setSelectedHub] = useState<RecycleHub | null>(null);
 
   const filteredHubs = recycleHubs.filter((hub) => {
     const matchesFilter = filter === "all" || hub.type === filter;
@@ -154,17 +98,6 @@ export const RecycleMap = () => {
       hub.address.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
-
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "e-waste":
-        return ewasteIcon;
-      case "composting":
-        return compostIcon;
-      default:
-        return recycleIcon;
-    }
-  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -175,6 +108,27 @@ export const RecycleMap = () => {
       default:
         return <Recycle className="w-4 h-4" />;
     }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "e-waste":
+        return "bg-blue-100 text-blue-600 border-blue-200";
+      case "composting":
+        return "bg-lime-100 text-lime-600 border-lime-200";
+      default:
+        return "bg-primary/10 text-primary border-primary/20";
+    }
+  };
+
+  // Generate OpenStreetMap embed URL with markers
+  const mapCenter = selectedHub 
+    ? `${selectedHub.lat},${selectedHub.lng}` 
+    : "12.9716,77.5946";
+  const zoom = selectedHub ? 15 : 12;
+  
+  const openInMaps = (hub: RecycleHub) => {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${hub.lat},${hub.lng}`, '_blank');
   };
 
   return (
@@ -206,66 +160,109 @@ export const RecycleMap = () => {
                 <SelectItem value="composting">Composting Facilities</SelectItem>
               </SelectContent>
             </Select>
-            <Button id="locate-btn" className="gradient-primary text-primary-foreground">
-              <Navigation className="w-4 h-4 mr-2" /> My Location
-            </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Map */}
-      <div className="h-[500px] rounded-xl overflow-hidden shadow-lg">
-        <MapContainer
-          center={[12.9716, 77.5946]}
-          zoom={12}
-          className="h-full w-full"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <LocationMarker />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Location List */}
+        <div className="lg:col-span-1 space-y-3 max-h-[500px] overflow-y-auto pr-2">
           {filteredHubs.map((hub) => (
-            <Marker key={hub.id} position={[hub.lat, hub.lng]} icon={getIcon(hub.type)}>
-              <Popup>
-                <div className="min-w-[200px]">
-                  <h3 className="font-bold text-primary">{hub.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{hub.description}</p>
-                  <div className="mt-3 space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      <span>{hub.address}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-primary" />
-                      <span>{hub.hours}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-primary" />
-                      <span>{hub.phone}</span>
-                    </div>
+            <Card 
+              key={hub.id} 
+              className={`cursor-pointer transition-all hover:shadow-md ${
+                selectedHub?.id === hub.id ? 'ring-2 ring-primary shadow-md' : ''
+              }`}
+              onClick={() => setSelectedHub(hub)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-full ${getTypeColor(hub.type)}`}>
+                    {getTypeIcon(hub.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-foreground truncate">{hub.name}</h4>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3" /> {hub.address}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {hub.hours}
+                    </p>
                   </div>
                 </div>
-              </Popup>
-            </Marker>
+              </CardContent>
+            </Card>
           ))}
-        </MapContainer>
+          {filteredHubs.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Recycle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>No locations found</p>
+            </div>
+          )}
+        </div>
+
+        {/* Map Iframe */}
+        <div className="lg:col-span-2">
+          <div className="h-[500px] rounded-xl overflow-hidden shadow-lg bg-muted">
+            <iframe
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=77.45,12.8,77.8,13.1&layer=mapnik&marker=${mapCenter}`}
+            />
+          </div>
+          
+          {/* Selected Location Details */}
+          {selectedHub && (
+            <Card className="mt-4 border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-bold text-lg text-foreground">{selectedHub.name}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{selectedHub.description}</p>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={() => openInMaps(selectedHub)}
+                    className="gradient-primary text-primary-foreground"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-1" /> Open in Maps
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <span>{selectedHub.address}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <span>{selectedHub.hours}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="w-4 h-4 text-primary" />
+                    <span>{selectedHub.phone}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
-      {/* Featured Locations */}
+      {/* All Locations Grid */}
       <div>
-        <h3 className="text-2xl font-bold text-foreground mb-4">Featured Recycling Centers</h3>
+        <h3 className="text-2xl font-bold text-foreground mb-4">All Recycling Centers</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredHubs.slice(0, 6).map((hub) => (
+          {filteredHubs.map((hub) => (
             <Card key={hub.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-lg text-primary">{hub.name}</CardTitle>
-                  <span className={`p-1.5 rounded-full ${
-                    hub.type === "e-waste" ? "bg-blue-100 text-blue-600" :
-                    hub.type === "composting" ? "bg-lime-100 text-lime-600" :
-                    "bg-primary/10 text-primary"
-                  }`}>
+                  <span className={`p-1.5 rounded-full border ${getTypeColor(hub.type)}`}>
                     {getTypeIcon(hub.type)}
                   </span>
                 </div>
@@ -283,6 +280,14 @@ export const RecycleMap = () => {
                     <span className="text-muted-foreground">{hub.phone}</span>
                   </div>
                 </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full mt-3 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  onClick={() => openInMaps(hub)}
+                >
+                  <MapPin className="w-4 h-4 mr-2" /> Get Directions
+                </Button>
               </CardContent>
             </Card>
           ))}
