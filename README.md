@@ -1,73 +1,118 @@
-# Welcome to your Lovable project
+# 🌍 Pro Planet Person – Eco-Engagement Web Platform
 
-## Project info
+Pro Planet Person is an interactive sustainability-based web application designed to make eco-friendly actions simple, rewarding, and community-driven. The platform motivates users to adopt sustainable habits, track their impact, and participate in real-world environmental initiatives.
 
-**URL**: https://lovable.dev/projects/608ae101-273c-4e4d-99d0-50b583f751d4
+---
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+### ⭐ Interactive User Dashboard
+- Tracks all eco-actions and progress  
+- Shows badges, certificates, and rewards  
+- Personalized sustainability tips  
 
-**Use Lovable**
+### 🎯 Task & Challenge System
+- Daily/weekly green tasks  
+- Users can also add their own tasks  
+- Completion rewards eco-coins  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/608ae101-273c-4e4d-99d0-50b583f751d4) and start prompting.
+### 🏆 Gamification & Rewards
+- Points, levels, badges, achievements  
+- Coins can be redeemed for perks or environmental causes  
+- Encourages continuous engagement  
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🌱 Sustainability Learning Hub
+- Articles, videos, awareness modules  
+- Real-time environmental facts  
+- Easy-to-understand eco-education  
 
-**Use your preferred IDE**
+### 👥 Community Participation
+- Group missions  
+- Share achievements  
+- Participate in eco-events  
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🔐 User Account Management
+- Login & logout system  
+- Profile section showing user details  
+- Certificates and achievements accessible from profile  
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🛠️ Tech Stack
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **HTML5**  
+- **CSS3**  
+- **JavaScript**  
+- **Bootstrap**  
+- **Custom Logic for Tasks & Reward System**  
+- Optional: Google APIs / Firebase (if implemented)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📂 Project Structure
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+/assets         → images, icons, illustrations
+/css            → stylesheets
+/js             → task logic, reward system, dashboard scripts
+/pages          → About, Dashboard, Tasks, Certificates, etc.
+index.html      → landing page
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## ⚙️ How to Run the Project Locally
 
-**Use GitHub Codespaces**
+1. Clone or download the project:
+   ```sh
+   git clone <your-repository-url>
+   ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+2. Open the folder in any editor (VS Code recommended).
 
-## What technologies are used for this project?
+3. Run the project:
+   - Double-click `index.html`, OR  
+   - Use Live Server extension in VS Code
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🌐 Deployment
 
-## How can I deploy this project?
+You can deploy the project using:
 
-Simply open [Lovable](https://lovable.dev/projects/608ae101-273c-4e4d-99d0-50b583f751d4) and click on Share -> Publish.
+- GitHub Pages  
+- Netlify  
+- Vercel  
+- Any static hosting service  
 
-## Can I connect a custom domain to my Lovable project?
+Upload the project folder or connect your GitHub repo.
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🧩 Customization Guide
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project can be customized easily:
+
+- Change theme colors in `/css`
+- Add or remove tasks in `/js/taskManager.js`
+- Update content in `/pages`
+- Replace images in `/assets`
+
+---
+
+## 📈 Future Enhancements
+
+- Convert eco-coins to real money using UPI (PhonePe / Google Pay / Paytm)  
+- Global leaderboard  
+- Personalized AI-based eco-tips  
+- Carbon footprint calculator  
+- Rewards Marketplace  
+
+---
+
+## 🙌 Acknowledgements
+
+Thanks to all contributors, eco-enthusiasts, and open-source tools that made this project possible.
+
+---
+
