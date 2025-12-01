@@ -1,0 +1,4 @@
+project_id = "clwumkdiebmekrvmlltr"
+
+[functions.pro-planet-chat]
+verify_jwt = false
